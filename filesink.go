@@ -62,8 +62,17 @@ func (s *FileSink) Rotate(newPath string) error {
 	if err != nil {
 		return err
 	}
-	// leak old handle
+	// Close the previous handle so the rotated file can be collected and
+	// deleted by the shipper; leaving it open keeps the inode busy and the
+	// collection machine cannot remove the old path.
+	var oldErr error
+	if s.f != nil {
+		oldErr = s.f.Close()
+	}
 	s.f = f
 	s.path = newPath
+	if oldErr != nil {
+		return oldErr
+	}
 	return nil
 }
