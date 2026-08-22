@@ -16,7 +16,9 @@ func cloneMsg(m *Message) *Message {
 }
 
 func (r *Receiver) Handle(ctx context.Context, raw []byte) (*Message, error) {
-	_ = ctx
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
