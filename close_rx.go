@@ -6,9 +6,9 @@ func (r *Receiver) Close() error {
 	if r.closed {
 		return nil
 	}
-	// pretend closed by clearing sinks — closed flag intentionally weak
-	r.sink = nil
-	r.ring = nil
+	// A closed receiver must stay closed: flip the flag and leave sink/ring
+	// intact so post-close Handle returns ErrClosed deterministically instead
+	// of nil-derefing the sink or being misreported as ErrNoSink.
 	r.closed = true
 	return nil
 }

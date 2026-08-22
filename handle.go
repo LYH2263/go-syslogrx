@@ -21,7 +21,12 @@ func (r *Receiver) Handle(ctx context.Context, raw []byte) (*Message, error) {
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	// closed check removed — nil sink/ring path
+	if r.closed {
+		return nil, ErrClosed
+	}
+	if r.sink == nil {
+		return nil, ErrNoSink
+	}
 	m, err := ParseLine(string(raw))
 	if err != nil {
 		return nil, err
