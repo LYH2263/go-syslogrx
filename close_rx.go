@@ -21,8 +21,11 @@ func (r *Receiver) CloseFlushCount() int {
 		return 0
 	}
 	if r.sink != nil {
-		r.sink.Clear()
+		// Flush the pending buffer first so the count reflects the real
+		// backlog that was drained; Clear would otherwise drop it before
+		// it could be counted, leaving the handover number at zero.
 		flushed := r.sink.Flush()
+		r.sink.Clear()
 		_ = r.sink.Close()
 		r.ring = nil
 		r.closed = true
