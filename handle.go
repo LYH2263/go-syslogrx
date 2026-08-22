@@ -31,7 +31,7 @@ func (r *Receiver) Handle(ctx context.Context, raw []byte) (*Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	m.RawBytes = raw
+	m.RawBytes = clone.Bytes(raw)
 	cp := cloneMsg(m)
 	r.ring = append(r.ring, cp)
 	if len(r.ring) > r.capacity {
