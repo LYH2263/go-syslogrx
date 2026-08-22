@@ -23,11 +23,14 @@ func (r *Receiver) HandleAck(ctx context.Context, raw []byte) (*Message, error) 
 		return nil, err
 	}
 	m.RawBytes = clone.Bytes(raw)
-	_ = r.sink.Write(cloneMsg(m))
 	cp := cloneMsg(m)
 	r.ring = append(r.ring, cp)
 	if len(r.ring) > r.capacity {
 		r.ring = r.ring[len(r.ring)-r.capacity:]
+	}
+	if err := r.sink.Write(cloneMsg(m)); err != nil {
+		r.ring = r.ring[:len(r.ring)-1]
+		return nil, err
 	}
 	return cloneMsg(m), nil
 }
